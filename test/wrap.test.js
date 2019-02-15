@@ -1,14 +1,26 @@
 'use strict';
 
-const koa = require('koa');
 const request = require('supertest');
 const { wrap } = require('..');
+const utils = require('./utils');
 
-describe.skip('test/wrap.test.js', () => {
+describe('test/wrap.test.js', () => {
   let app;
 
-  it('b', async () => {
-    app = new koa();
+  it('should support express', async () => {
+    app = utils.createApp();
+    app.use(wrap(function(req, res) {
+      res.send('a');
+    }));
+
+    await request(app.callback())
+      .get('/')
+      .expect('a')
+      .expect(200);
+  });
+
+  it('should support express with next', async () => {
+    app = utils.createApp();
     app.use(wrap(function(req, res, next) {
       setTimeout(() => {
         next();
@@ -17,10 +29,27 @@ describe.skip('test/wrap.test.js', () => {
     app.use(wrap(function(req, res) {
       res.send('a');
     }));
+    app.use(wrap(function(req, res) {
+      res.send('b');
+    }));
 
-    request(app.callback())
+    await request(app.callback())
       .get('/')
-      .expect({});
+      .expect('a')
+      .expect(200);
   });
 
+  it('should support express with error', async () => {
+    app = utils.createApp();
+    app.use(wrap(function(req, res, next) {
+      setTimeout(() => {
+        next(new Error('error'));
+      }, 1000);
+    }));
+
+    await request(app.callback())
+      .get('/')
+      .expect(/Error: error/)
+      .expect(500);
+  });
 });
