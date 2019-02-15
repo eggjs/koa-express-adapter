@@ -4,28 +4,28 @@ var request = require('supertest')
 
 describe('res', function () {
   describe('.sendStatus(statusCode)', function () {
-    it('should send the status code and message as body', function (done) {
-      var app = express();
+    it('should send the status code and message as body', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.sendStatus(201);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(201, 'Created', done);
+      .expect(201, 'Created');
     })
 
-    it('should work with unknown code', function (done) {
-      var app = express();
+    it('should work with unknown code', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.sendStatus(599);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(599, '599', done);
+      .expect(599, '599');
     })
   })
 })

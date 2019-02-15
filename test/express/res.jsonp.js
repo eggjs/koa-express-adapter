@@ -1,367 +1,367 @@
 
-var express = require('../')
+var koa = require('koa')
   , request = require('supertest')
   , assert = require('assert');
 var utils = require('./support/utils');
 
 describe('res', function(){
   describe('.jsonp(object)', function(){
-    it('should respond with jsonp', function(done){
-      var app = express();
+    it('should respond with jsonp', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
-        res.jsonp({ count: 1 });
-      });
+      app.use(wrap(function(req, res){
+        res.jsonp({ count: 1 }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/?callback=something')
       .expect('Content-Type', 'text/javascript; charset=utf-8')
-      .expect(200, /something\(\{"count":1\}\);/, done);
+      .expect(200, /something\(\{"count":1\}\);/);
     })
 
-    it('should use first callback parameter with jsonp', function(done){
-      var app = express();
+    it('should use first callback parameter with jsonp', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
-        res.jsonp({ count: 1 });
-      });
+      app.use(wrap(function(req, res){
+        res.jsonp({ count: 1 }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/?callback=something&callback=somethingelse')
       .expect('Content-Type', 'text/javascript; charset=utf-8')
-      .expect(200, /something\(\{"count":1\}\);/, done);
+      .expect(200, /something\(\{"count":1\}\);/);
     })
 
-    it('should ignore object callback parameter with jsonp', function(done){
-      var app = express();
+    it('should ignore object callback parameter with jsonp', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
-        res.jsonp({ count: 1 });
-      });
+      app.use(wrap(function(req, res){
+        res.jsonp({ count: 1 }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/?callback[a]=something')
       .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(200, '{"count":1}', done)
+      .expect(200, '{"count":1}')
     })
 
-    it('should allow renaming callback', function(done){
-      var app = express();
+    it('should allow renaming callback', async () =>{
+      var app = new koa();
 
       app.set('jsonp callback name', 'clb');
 
-      app.use(function(req, res){
-        res.jsonp({ count: 1 });
-      });
+      app.use(wrap(function(req, res){
+        res.jsonp({ count: 1 }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/?clb=something')
       .expect('Content-Type', 'text/javascript; charset=utf-8')
-      .expect(200, /something\(\{"count":1\}\);/, done);
+      .expect(200, /something\(\{"count":1\}\);/);
     })
 
-    it('should allow []', function(done){
-      var app = express();
+    it('should allow []', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
-        res.jsonp({ count: 1 });
-      });
+      app.use(wrap(function(req, res){
+        res.jsonp({ count: 1 }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/?callback=callbacks[123]')
       .expect('Content-Type', 'text/javascript; charset=utf-8')
-      .expect(200, /callbacks\[123\]\(\{"count":1\}\);/, done);
+      .expect(200, /callbacks\[123\]\(\{"count":1\}\);/);
     })
 
-    it('should disallow arbitrary js', function(done){
-      var app = express();
+    it('should disallow arbitrary js', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
-        res.jsonp({});
-      });
+      app.use(wrap(function(req, res){
+        res.jsonp({}));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/?callback=foo;bar()')
       .expect('Content-Type', 'text/javascript; charset=utf-8')
-      .expect(200, /foobar\(\{\}\);/, done);
+      .expect(200, /foobar\(\{\}\);/);
     })
 
-    it('should escape utf whitespace', function(done){
-      var app = express();
+    it('should escape utf whitespace', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
-        res.jsonp({ str: '\u2028 \u2029 woot' });
-      });
+      app.use(wrap(function(req, res){
+        res.jsonp({ str: '\u2028 \u2029 woot' }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/?callback=foo')
       .expect('Content-Type', 'text/javascript; charset=utf-8')
-      .expect(200, /foo\(\{"str":"\\u2028 \\u2029 woot"\}\);/, done);
-    });
+      .expect(200, /foo\(\{"str":"\\u2028 \\u2029 woot"\}\);/);
+    }));
 
-    it('should not escape utf whitespace for json fallback', function(done){
-      var app = express();
+    it('should not escape utf whitespace for json fallback', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
-        res.jsonp({ str: '\u2028 \u2029 woot' });
-      });
+      app.use(wrap(function(req, res){
+        res.jsonp({ str: '\u2028 \u2029 woot' }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(200, '{"str":"\u2028 \u2029 woot"}', done);
-    });
+      .expect(200, '{"str":"\u2028 \u2029 woot"}');
+    }));
 
-    it('should include security header and prologue', function (done) {
-      var app = express();
+    it('should include security header and prologue', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
-        res.jsonp({ count: 1 });
-      });
+      app.use(wrap(function(req, res){
+        res.jsonp({ count: 1 }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/?callback=something')
       .expect('Content-Type', 'text/javascript; charset=utf-8')
       .expect('X-Content-Type-Options', 'nosniff')
-      .expect(200, /^\/\*\*\//, done);
+      .expect(200, /^\/\*\*\//);
     })
 
-    it('should not override previous Content-Types with no callback', function(done){
-      var app = express();
+    it('should not override previous Content-Types with no callback', async () =>{
+      var app = new koa();
 
       app.get('/', function(req, res){
         res.type('application/vnd.example+json');
-        res.jsonp({ hello: 'world' });
-      });
+        res.jsonp({ hello: 'world' }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Content-Type', 'application/vnd.example+json; charset=utf-8')
       .expect(utils.shouldNotHaveHeader('X-Content-Type-Options'))
-      .expect(200, '{"hello":"world"}', done);
+      .expect(200, '{"hello":"world"}');
     })
 
-    it('should override previous Content-Types with callback', function(done){
-      var app = express();
+    it('should override previous Content-Types with callback', async () =>{
+      var app = new koa();
 
       app.get('/', function(req, res){
         res.type('application/vnd.example+json');
-        res.jsonp({ hello: 'world' });
-      });
+        res.jsonp({ hello: 'world' }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/?callback=cb')
       .expect('Content-Type', 'text/javascript; charset=utf-8')
       .expect('X-Content-Type-Options', 'nosniff')
-      .expect(200, /cb\(\{"hello":"world"\}\);$/, done);
+      .expect(200, /cb\(\{"hello":"world"\}\);$/);
     })
 
     describe('when given primitives', function(){
-      it('should respond with json', function(done){
-        var app = express();
+      it('should respond with json', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.jsonp(null);
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(200, 'null', done)
+        .expect(200, 'null')
       })
     })
 
     describe('when given an array', function(){
-      it('should respond with json', function(done){
-        var app = express();
+      it('should respond with json', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.jsonp(['foo', 'bar', 'baz']);
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(200, '["foo","bar","baz"]', done)
+        .expect(200, '["foo","bar","baz"]')
       })
     })
 
     describe('when given an object', function(){
-      it('should respond with json', function(done){
-        var app = express();
+      it('should respond with json', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
-          res.jsonp({ name: 'tobi' });
-        });
+        app.use(wrap(function(req, res){
+          res.jsonp({ name: 'tobi' }));
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(200, '{"name":"tobi"}', done)
+        .expect(200, '{"name":"tobi"}')
       })
     })
 
     describe('when given primitives', function(){
-      it('should respond with json for null', function(done){
-        var app = express();
+      it('should respond with json for null', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.jsonp(null);
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(200, 'null', done)
+        .expect(200, 'null')
       })
 
-      it('should respond with json for Number', function(done){
-        var app = express();
+      it('should respond with json for Number', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.jsonp(300);
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(200, '300', done)
+        .expect(200, '300')
       })
 
-      it('should respond with json for String', function(done){
-        var app = express();
+      it('should respond with json for String', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.jsonp('str');
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(200, '"str"', done)
+        .expect(200, '"str"')
       })
     })
 
     describe('"json escape" setting', function () {
       it('should be undefined by default', function () {
-        var app = express()
+        var app = new koa()
         assert.strictEqual(app.get('json escape'), undefined)
       })
 
-      it('should unicode escape HTML-sniffing characters', function (done) {
-        var app = express()
+      it('should unicode escape HTML-sniffing characters', async () =>{
+        var app = new koa()
 
         app.enable('json escape')
 
-        app.use(function (req, res) {
+        app.use(wrap(function (req, res) {
           res.jsonp({ '&': '\u2028<script>\u2029' })
         })
 
-        request(app)
+        await request(app.callback())
         .get('/?callback=foo')
         .expect('Content-Type', 'text/javascript; charset=utf-8')
-        .expect(200, /foo\({"\\u0026":"\\u2028\\u003cscript\\u003e\\u2029"}\)/, done)
+        .expect(200, /foo\({"\\u0026":"\\u2028\\u003cscript\\u003e\\u2029"}\)/)
       })
     })
 
     describe('"json replacer" setting', function(){
-      it('should be passed to JSON.stringify()', function(done){
-        var app = express();
+      it('should be passed to JSON.stringify()', async () =>{
+        var app = new koa();
 
         app.set('json replacer', function(key, val){
           return key[0] === '_'
             ? undefined
             : val;
-        });
+        }));
 
-        app.use(function(req, res){
-          res.jsonp({ name: 'tobi', _id: 12345 });
-        });
+        app.use(wrap(function(req, res){
+          res.jsonp({ name: 'tobi', _id: 12345 }));
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(200, '{"name":"tobi"}', done)
+        .expect(200, '{"name":"tobi"}')
       })
     })
 
     describe('"json spaces" setting', function(){
       it('should be undefined by default', function(){
-        var app = express();
+        var app = new koa();
         assert(undefined === app.get('json spaces'));
       })
 
-      it('should be passed to JSON.stringify()', function(done){
-        var app = express();
+      it('should be passed to JSON.stringify()', async () =>{
+        var app = new koa();
 
         app.set('json spaces', 2);
 
-        app.use(function(req, res){
-          res.jsonp({ name: 'tobi', age: 2 });
-        });
+        app.use(wrap(function(req, res){
+          res.jsonp({ name: 'tobi', age: 2 }));
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(200, '{\n  "name": "tobi",\n  "age": 2\n}', done)
+        .expect(200, '{\n  "name": "tobi",\n  "age": 2\n}')
       })
     })
   })
 
   describe('.jsonp(status, object)', function(){
-    it('should respond with json and set the .statusCode', function(done){
-      var app = express();
+    it('should respond with json and set the .statusCode', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
-        res.jsonp(201, { id: 1 });
-      });
+      app.use(wrap(function(req, res){
+        res.jsonp(201, { id: 1 }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(201, '{"id":1}', done)
+      .expect(201, '{"id":1}')
     })
   })
 
   describe('.jsonp(object, status)', function(){
-    it('should respond with json and set the .statusCode for backwards compat', function(done){
-      var app = express();
+    it('should respond with json and set the .statusCode for backwards compat', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.jsonp({ id: 1 }, 201);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(201, '{"id":1}', done)
+      .expect(201, '{"id":1}')
     })
 
-    it('should use status as second number for backwards compat', function(done){
-      var app = express();
+    it('should use status as second number for backwards compat', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.jsonp(200, 201);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(201, '200', done)
+      .expect(201, '200')
     })
   })
 
-  it('should not override previous Content-Types', function(done){
-    var app = express();
+  it('should not override previous Content-Types', async () =>{
+    var app = new koa();
 
     app.get('/', function(req, res){
       res.type('application/vnd.example+json');
-      res.jsonp({ hello: 'world' });
-    });
+      res.jsonp({ hello: 'world' }));
+    }));
 
-    request(app)
+    await request(app.callback())
     .get('/')
     .expect('content-type', 'application/vnd.example+json; charset=utf-8')
-    .expect(200, '{"hello":"world"}', done)
+    .expect(200, '{"hello":"world"}')
   })
 })

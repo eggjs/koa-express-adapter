@@ -4,7 +4,7 @@ const koa = require('koa');
 
 describe('test/wrap.test.js', () => {
 
-  it('b', async function() {
+  it('b', async () => {
     app = new koa();
     app.use(wrap(function(req, res, next) {
       setTimeout(() => {

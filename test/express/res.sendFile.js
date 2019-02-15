@@ -1,7 +1,7 @@
 
 var after = require('after');
 var Buffer = require('safe-buffer').Buffer
-var express = require('../')
+var koa = require('koa')
   , request = require('supertest')
   , assert = require('assert');
 var onFinished = require('on-finished');
@@ -12,96 +12,96 @@ var utils = require('./support/utils');
 
 describe('res', function(){
   describe('.sendFile(path)', function () {
-    it('should error missing path', function (done) {
+    it('should error missing path', async () =>{
       var app = createApp();
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(500, /path.*required/, done);
-    });
+      .expect(500, /path.*required/);
+    }));
 
-    it('should transfer a file', function (done) {
+    it('should transfer a file', async () =>{
       var app = createApp(path.resolve(fixtures, 'name.txt'));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(200, 'tobi', done);
-    });
+      .expect(200, 'tobi');
+    }));
 
-    it('should transfer a file with special characters in string', function (done) {
+    it('should transfer a file with special characters in string', async () =>{
       var app = createApp(path.resolve(fixtures, '% of dogs.txt'));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(200, '20%', done);
-    });
+      .expect(200, '20%');
+    }));
 
-    it('should include ETag', function (done) {
+    it('should include ETag', async () =>{
       var app = createApp(path.resolve(fixtures, 'name.txt'));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('ETag', /^(?:W\/)?"[^"]+"$/)
-      .expect(200, 'tobi', done);
-    });
+      .expect(200, 'tobi');
+    }));
 
-    it('should 304 when ETag matches', function (done) {
+    it('should 304 when ETag matches', async () =>{
       var app = createApp(path.resolve(fixtures, 'name.txt'));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('ETag', /^(?:W\/)?"[^"]+"$/)
       .expect(200, 'tobi', function (err, res) {
         if (err) return done(err);
         var etag = res.headers.etag;
-        request(app)
+        await request(app.callback())
         .get('/')
         .set('If-None-Match', etag)
-        .expect(304, done);
-      });
-    });
+        .expect(304);
+      }));
+    }));
 
-    it('should 404 for directory', function (done) {
+    it('should 404 for directory', async () =>{
       var app = createApp(path.resolve(fixtures, 'blog'));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(404, done);
-    });
+      .expect(404);
+    }));
 
-    it('should 404 when not found', function (done) {
+    it('should 404 when not found', async () =>{
       var app = createApp(path.resolve(fixtures, 'does-no-exist'));
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.statusCode = 200;
         res.send('no!');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(404, done);
-    });
+      .expect(404);
+    }));
 
-    it('should not override manual content-types', function (done) {
-      var app = express();
+    it('should not override manual content-types', async () =>{
+      var app = new koa();
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.contentType('application/x-bogus');
         res.sendFile(path.resolve(fixtures, 'name.txt'));
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Content-Type', 'application/x-bogus')
       .end(done);
     })
 
-    it('should not error if the client aborts', function (done) {
-      var app = express();
-      var cb = after(2, done)
+    it('should not error if the client aborts', async () =>{
+      var app = new koa();
+      var cb = after(2)
       var error = null
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         setImmediate(function () {
           res.sendFile(path.resolve(fixtures, 'name.txt'));
           server.close(cb)
@@ -110,12 +110,12 @@ describe('res', function(){
           }, 10)
         })
         test.abort();
-      });
+      }));
 
-      app.use(function (err, req, res, next) {
+      app.use(wrap(function (err, req, res, next) {
         error = err
         next(err)
-      });
+      }));
 
       var server = app.listen()
       var test = request(server).get('/')
@@ -123,539 +123,539 @@ describe('res', function(){
     })
 
     describe('with "cacheControl" option', function () {
-      it('should enable cacheControl by default', function (done) {
+      it('should enable cacheControl by default', async () =>{
         var app = createApp(path.resolve(__dirname, 'fixtures/name.txt'))
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Cache-Control', 'public, max-age=0')
-        .expect(200, done)
+        .expect(200)
       })
 
-      it('should accept cacheControl option', function (done) {
+      it('should accept cacheControl option', async () =>{
         var app = createApp(path.resolve(__dirname, 'fixtures/name.txt'), { cacheControl: false })
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect(utils.shouldNotHaveHeader('Cache-Control'))
-        .expect(200, done)
+        .expect(200)
       })
     })
 
     describe('with "dotfiles" option', function () {
-      it('should not serve dotfiles by default', function (done) {
+      it('should not serve dotfiles by default', async () =>{
         var app = createApp(path.resolve(__dirname, 'fixtures/.name'));
 
-        request(app)
+        await request(app.callback())
         .get('/')
-        .expect(404, done);
-      });
+        .expect(404);
+      }));
 
-      it('should accept dotfiles option', function(done){
-        var app = createApp(path.resolve(__dirname, 'fixtures/.name'), { dotfiles: 'allow' });
+      it('should accept dotfiles option', async () =>{
+        var app = createApp(path.resolve(__dirname, 'fixtures/.name'), { dotfiles: 'allow' }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect(200)
         .expect(shouldHaveBody(Buffer.from('tobi')))
         .end(done)
-      });
-    });
+      }));
+    }));
 
     describe('with "headers" option', function () {
-      it('should accept headers option', function (done) {
+      it('should accept headers option', async () =>{
         var headers = {
           'x-success': 'sent',
           'x-other': 'done'
         };
-        var app = createApp(path.resolve(__dirname, 'fixtures/name.txt'), { headers: headers });
+        var app = createApp(path.resolve(__dirname, 'fixtures/name.txt'), { headers: headers }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('x-success', 'sent')
         .expect('x-other', 'done')
-        .expect(200, done);
-      });
+        .expect(200);
+      }));
 
-      it('should ignore headers option on 404', function (done) {
+      it('should ignore headers option on 404', async () =>{
         var headers = { 'x-success': 'sent' };
-        var app = createApp(path.resolve(__dirname, 'fixtures/does-not-exist'), { headers: headers });
+        var app = createApp(path.resolve(__dirname, 'fixtures/does-not-exist'), { headers: headers }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect(utils.shouldNotHaveHeader('X-Success'))
-        .expect(404, done);
-      });
-    });
+        .expect(404);
+      }));
+    }));
 
     describe('with "immutable" option', function () {
-      it('should add immutable cache-control directive', function (done) {
+      it('should add immutable cache-control directive', async () =>{
         var app = createApp(path.resolve(__dirname, 'fixtures/name.txt'), {
           immutable: true,
           maxAge: '4h'
         })
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Cache-Control', 'public, max-age=14400, immutable')
-        .expect(200, done)
+        .expect(200)
       })
     })
 
     describe('with "maxAge" option', function () {
-      it('should set cache-control max-age from number', function (done) {
+      it('should set cache-control max-age from number', async () =>{
         var app = createApp(path.resolve(__dirname, 'fixtures/name.txt'), {
           maxAge: 14400000
         })
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Cache-Control', 'public, max-age=14400')
-        .expect(200, done)
+        .expect(200)
       })
 
-      it('should set cache-control max-age from string', function (done) {
+      it('should set cache-control max-age from string', async () =>{
         var app = createApp(path.resolve(__dirname, 'fixtures/name.txt'), {
           maxAge: '4h'
         })
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Cache-Control', 'public, max-age=14400')
-        .expect(200, done)
+        .expect(200)
       })
     })
 
     describe('with "root" option', function () {
-      it('should not transfer relative with without', function (done) {
+      it('should not transfer relative with without', async () =>{
         var app = createApp('test/fixtures/name.txt');
 
-        request(app)
+        await request(app.callback())
         .get('/')
-        .expect(500, /must be absolute/, done);
+        .expect(500, /must be absolute/);
       })
 
-      it('should serve relative to "root"', function (done) {
-        var app = createApp('name.txt', {root: fixtures});
+      it('should serve relative to "root"', async () =>{
+        var app = createApp('name.txt', {root: fixtures}));
 
-        request(app)
+        await request(app.callback())
         .get('/')
-        .expect(200, 'tobi', done);
+        .expect(200, 'tobi');
       })
 
-      it('should disallow requesting out of "root"', function (done) {
-        var app = createApp('foo/../../user.html', {root: fixtures});
+      it('should disallow requesting out of "root"', async () =>{
+        var app = createApp('foo/../../user.html', {root: fixtures}));
 
-        request(app)
+        await request(app.callback())
         .get('/')
-        .expect(403, done);
+        .expect(403);
       })
     })
   })
 
   describe('.sendFile(path, fn)', function () {
-    it('should invoke the callback when complete', function (done) {
-      var cb = after(2, done);
+    it('should invoke the callback when complete', async () =>{
+      var cb = after(2);
       var app = createApp(path.resolve(fixtures, 'name.txt'), cb);
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect(200, cb);
     })
 
-    it('should invoke the callback when client aborts', function (done) {
-      var cb = after(1, done);
-      var app = express();
+    it('should invoke the callback when client aborts', async () =>{
+      var cb = after(1);
+      var app = new koa();
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         setImmediate(function () {
           res.sendFile(path.resolve(fixtures, 'name.txt'), function (err) {
             should(err).be.ok()
             err.code.should.equal('ECONNABORTED');
             server.close(cb)
-          });
-        });
+          }));
+        }));
         test.abort();
-      });
+      }));
 
       var server = app.listen()
       var test = request(server).get('/')
       test.expect(200, cb);
     })
 
-    it('should invoke the callback when client already aborted', function (done) {
-      var cb = after(1, done);
-      var app = express();
+    it('should invoke the callback when client already aborted', async () =>{
+      var cb = after(1);
+      var app = new koa();
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         onFinished(res, function () {
           res.sendFile(path.resolve(fixtures, 'name.txt'), function (err) {
             should(err).be.ok()
             err.code.should.equal('ECONNABORTED');
             server.close(cb)
-          });
-        });
+          }));
+        }));
         test.abort();
-      });
+      }));
 
       var server = app.listen()
       var test = request(server).get('/')
       test.expect(200, cb);
     })
 
-    it('should invoke the callback without error when HEAD', function (done) {
-      var app = express();
-      var cb = after(2, done);
+    it('should invoke the callback without error when HEAD', async () =>{
+      var app = new koa();
+      var cb = after(2);
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.sendFile(path.resolve(fixtures, 'name.txt'), cb);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .head('/')
       .expect(200, cb);
-    });
+    }));
 
-    it('should invoke the callback without error when 304', function (done) {
-      var app = express();
-      var cb = after(3, done);
+    it('should invoke the callback without error when 304', async () =>{
+      var app = new koa();
+      var cb = after(3);
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.sendFile(path.resolve(fixtures, 'name.txt'), cb);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('ETag', /^(?:W\/)?"[^"]+"$/)
       .expect(200, 'tobi', function (err, res) {
         if (err) return cb(err);
         var etag = res.headers.etag;
-        request(app)
+        await request(app.callback())
         .get('/')
         .set('If-None-Match', etag)
         .expect(304, cb);
-      });
-    });
+      }));
+    }));
 
-    it('should invoke the callback on 404', function(done){
-      var app = express();
+    it('should invoke the callback on 404', async () =>{
+      var app = new koa();
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.sendFile(path.resolve(fixtures, 'does-not-exist'), function (err) {
           should(err).be.ok()
           err.status.should.equal(404);
           res.send('got it');
-        });
-      });
+        }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(200, 'got it', done);
+      .expect(200, 'got it');
     })
   })
 
   describe('.sendFile(path, options)', function () {
-    it('should pass options to send module', function (done) {
+    it('should pass options to send module', async () =>{
       request(createApp(path.resolve(fixtures, 'name.txt'), { start: 0, end: 1 }))
       .get('/')
-      .expect(200, 'to', done)
+      .expect(200, 'to')
     })
   })
 
   describe('.sendfile(path, fn)', function(){
-    it('should invoke the callback when complete', function(done){
-      var app = express();
-      var cb = after(2, done);
+    it('should invoke the callback when complete', async () =>{
+      var app = new koa();
+      var cb = after(2);
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.sendfile('test/fixtures/user.html', cb)
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect(200, cb);
     })
 
-    it('should utilize the same options as express.static()', function(done){
-      var app = express();
+    it('should utilize the same options as express.static()', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
-        res.sendfile('test/fixtures/user.html', { maxAge: 60000 });
-      });
+      app.use(wrap(function(req, res){
+        res.sendfile('test/fixtures/user.html', { maxAge: 60000 }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Cache-Control', 'public, max-age=60')
       .end(done);
     })
 
-    it('should invoke the callback when client aborts', function (done) {
-      var cb = after(1, done);
-      var app = express();
+    it('should invoke the callback when client aborts', async () =>{
+      var cb = after(1);
+      var app = new koa();
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         setImmediate(function () {
           res.sendfile('test/fixtures/name.txt', function (err) {
             should(err).be.ok()
             err.code.should.equal('ECONNABORTED');
             server.close(cb)
-          });
-        });
+          }));
+        }));
         test.abort();
-      });
+      }));
 
       var server = app.listen()
       var test = request(server).get('/')
       test.expect(200, cb);
     })
 
-    it('should invoke the callback when client already aborted', function (done) {
-      var cb = after(1, done);
-      var app = express();
+    it('should invoke the callback when client already aborted', async () =>{
+      var cb = after(1);
+      var app = new koa();
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         onFinished(res, function () {
           res.sendfile('test/fixtures/name.txt', function (err) {
             should(err).be.ok()
             err.code.should.equal('ECONNABORTED');
             server.close(cb)
-          });
-        });
+          }));
+        }));
         test.abort();
-      });
+      }));
 
       var server = app.listen()
       var test = request(server).get('/')
       test.expect(200, cb);
     })
 
-    it('should invoke the callback without error when HEAD', function (done) {
-      var app = express();
-      var cb = after(2, done);
+    it('should invoke the callback without error when HEAD', async () =>{
+      var app = new koa();
+      var cb = after(2);
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.sendfile('test/fixtures/name.txt', cb);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .head('/')
       .expect(200, cb);
-    });
+    }));
 
-    it('should invoke the callback without error when 304', function (done) {
-      var app = express();
-      var cb = after(3, done);
+    it('should invoke the callback without error when 304', async () =>{
+      var app = new koa();
+      var cb = after(3);
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.sendfile('test/fixtures/name.txt', cb);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('ETag', /^(?:W\/)?"[^"]+"$/)
       .expect(200, 'tobi', function (err, res) {
         if (err) return cb(err);
         var etag = res.headers.etag;
-        request(app)
+        await request(app.callback())
         .get('/')
         .set('If-None-Match', etag)
         .expect(304, cb);
-      });
-    });
+      }));
+    }));
 
-    it('should invoke the callback on 404', function(done){
-      var app = express();
+    it('should invoke the callback on 404', async () =>{
+      var app = new koa();
       var calls = 0;
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.sendfile('test/fixtures/nope.html', function(err){
           assert.equal(calls++, 0);
           assert(!res.headersSent);
           res.send(err.message);
-        });
-      });
+        }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(200, /^ENOENT.*?, stat/, done);
+      .expect(200, /^ENOENT.*?, stat/);
     })
 
-    it('should not override manual content-types', function(done){
-      var app = express();
+    it('should not override manual content-types', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.contentType('txt');
         res.sendfile('test/fixtures/user.html');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Content-Type', 'text/plain; charset=utf-8')
       .end(done);
     })
 
-    it('should invoke the callback on 403', function(done){
-      var app = express()
+    it('should invoke the callback on 403', async () =>{
+      var app = new koa()
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.sendfile('test/fixtures/foo/../user.html', function(err){
           assert(!res.headersSent);
           res.send(err.message);
-        });
-      });
+        }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Forbidden')
-      .expect(200, done);
+      .expect(200);
     })
 
-    it('should invoke the callback on socket error', function(done){
-      var app = express()
+    it('should invoke the callback on socket error', async () =>{
+      var app = new koa()
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.sendfile('test/fixtures/user.html', function(err){
           assert(!res.headersSent);
           req.socket.listeners('error').should.have.length(1); // node's original handler
           done();
-        });
+        }));
 
         req.socket.emit('error', new Error('broken!'));
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .end(function(){});
+      .end(function(){}));
     })
   })
 
   describe('.sendfile(path)', function(){
-    it('should not serve dotfiles', function(done){
-      var app = express();
+    it('should not serve dotfiles', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.sendfile('test/fixtures/.name');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(404, done);
+      .expect(404);
     })
 
-    it('should accept dotfiles option', function(done){
-      var app = express();
+    it('should accept dotfiles option', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
-        res.sendfile('test/fixtures/.name', { dotfiles: 'allow' });
-      });
+      app.use(wrap(function(req, res){
+        res.sendfile('test/fixtures/.name', { dotfiles: 'allow' }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect(200)
       .expect(shouldHaveBody(Buffer.from('tobi')))
       .end(done)
     })
 
-    it('should accept headers option', function(done){
-      var app = express();
+    it('should accept headers option', async () =>{
+      var app = new koa();
       var headers = {
         'x-success': 'sent',
         'x-other': 'done'
       };
 
-      app.use(function(req, res){
-        res.sendfile('test/fixtures/user.html', { headers: headers });
-      });
+      app.use(wrap(function(req, res){
+        res.sendfile('test/fixtures/user.html', { headers: headers }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('x-success', 'sent')
       .expect('x-other', 'done')
-      .expect(200, done);
+      .expect(200);
     })
 
-    it('should ignore headers option on 404', function(done){
-      var app = express();
+    it('should ignore headers option on 404', async () =>{
+      var app = new koa();
       var headers = { 'x-success': 'sent' };
 
-      app.use(function(req, res){
-        res.sendfile('test/fixtures/user.nothing', { headers: headers });
-      });
+      app.use(wrap(function(req, res){
+        res.sendfile('test/fixtures/user.nothing', { headers: headers }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
         .expect(utils.shouldNotHaveHeader('X-Success'))
-        .expect(404, done);
+        .expect(404);
     })
 
-    it('should transfer a file', function (done) {
-      var app = express();
+    it('should transfer a file', async () =>{
+      var app = new koa();
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.sendfile('test/fixtures/name.txt');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(200, 'tobi', done);
-    });
+      .expect(200, 'tobi');
+    }));
 
-    it('should transfer a directory index file', function (done) {
-      var app = express();
+    it('should transfer a directory index file', async () =>{
+      var app = new koa();
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.sendfile('test/fixtures/blog/');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(200, '<b>index</b>', done);
-    });
+      .expect(200, '<b>index</b>');
+    }));
 
-    it('should 404 for directory without trailing slash', function (done) {
-      var app = express();
+    it('should 404 for directory without trailing slash', async () =>{
+      var app = new koa();
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.sendfile('test/fixtures/blog');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(404, done);
-    });
+      .expect(404);
+    }));
 
-    it('should transfer a file with urlencoded name', function (done) {
-      var app = express();
+    it('should transfer a file with urlencoded name', async () =>{
+      var app = new koa();
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.sendfile('test/fixtures/%25%20of%20dogs.txt');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(200, '20%', done);
-    });
+      .expect(200, '20%');
+    }));
 
-    it('should not error if the client aborts', function (done) {
-      var app = express();
-      var cb = after(2, done)
+    it('should not error if the client aborts', async () =>{
+      var app = new koa();
+      var cb = after(2)
       var error = null
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         setImmediate(function () {
           res.sendfile(path.resolve(fixtures, 'name.txt'));
           server.close(cb)
           setTimeout(function () {
             cb(error)
           }, 10)
-        });
+        }));
         test.abort();
-      });
+      }));
 
-      app.use(function (err, req, res, next) {
+      app.use(wrap(function (err, req, res, next) {
         error = err
         next(err)
-      });
+      }));
 
       var server = app.listen()
       var test = request(server).get('/')
@@ -663,120 +663,120 @@ describe('res', function(){
     })
 
     describe('with an absolute path', function(){
-      it('should transfer the file', function(done){
-        var app = express();
+      it('should transfer the file', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.sendfile(path.join(__dirname, '/fixtures/user.html'))
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Content-Type', 'text/html; charset=UTF-8')
-        .expect(200, '<p>{{user.name}}</p>', done);
+        .expect(200, '<p>{{user.name}}</p>');
       })
     })
 
     describe('with a relative path', function(){
-      it('should transfer the file', function(done){
-        var app = express();
+      it('should transfer the file', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.sendfile('test/fixtures/user.html');
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Content-Type', 'text/html; charset=UTF-8')
-        .expect(200, '<p>{{user.name}}</p>', done);
+        .expect(200, '<p>{{user.name}}</p>');
       })
 
-      it('should serve relative to "root"', function(done){
-        var app = express();
+      it('should serve relative to "root"', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
-          res.sendfile('user.html', { root: 'test/fixtures/' });
-        });
+        app.use(wrap(function(req, res){
+          res.sendfile('user.html', { root: 'test/fixtures/' }));
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect('Content-Type', 'text/html; charset=UTF-8')
-        .expect(200, '<p>{{user.name}}</p>', done);
+        .expect(200, '<p>{{user.name}}</p>');
       })
 
-      it('should consider ../ malicious when "root" is not set', function(done){
-        var app = express();
+      it('should consider ../ malicious when "root" is not set', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.sendfile('test/fixtures/foo/../user.html');
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
-        .expect(403, done);
+        .expect(403);
       })
 
-      it('should allow ../ when "root" is set', function(done){
-        var app = express();
+      it('should allow ../ when "root" is set', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
-          res.sendfile('foo/../user.html', { root: 'test/fixtures' });
-        });
+        app.use(wrap(function(req, res){
+          res.sendfile('foo/../user.html', { root: 'test/fixtures' }));
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
-        .expect(200, done);
+        .expect(200);
       })
 
-      it('should disallow requesting out of "root"', function(done){
-        var app = express();
+      it('should disallow requesting out of "root"', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
-          res.sendfile('foo/../../user.html', { root: 'test/fixtures' });
-        });
+        app.use(wrap(function(req, res){
+          res.sendfile('foo/../../user.html', { root: 'test/fixtures' }));
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
-        .expect(403, done);
+        .expect(403);
       })
 
-      it('should next(404) when not found', function(done){
-        var app = express()
+      it('should next(404) when not found', async () =>{
+        var app = new koa()
           , calls = 0;
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.sendfile('user.html');
-        });
+        }));
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           assert(0, 'this should not be called');
-        });
+        }));
 
-        app.use(function(err, req, res, next){
+        app.use(wrap(function(err, req, res, next){
           ++calls;
           next(err);
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .end(function(err, res){
           res.statusCode.should.equal(404);
           calls.should.equal(1);
           done();
-        });
+        }));
       })
 
       describe('with non-GET', function(){
-        it('should still serve', function(done){
-          var app = express()
+        it('should still serve', async () =>{
+          var app = new koa()
 
-          app.use(function(req, res){
+          app.use(wrap(function(req, res){
             res.sendfile(path.join(__dirname, '/fixtures/name.txt'))
-          });
+          }));
 
-          request(app)
+          await request(app.callback())
           .get('/')
-          .expect('tobi', done);
+          .expect('tobi');
         })
       })
     })
@@ -784,25 +784,25 @@ describe('res', function(){
 })
 
 describe('.sendfile(path, options)', function () {
-  it('should pass options to send module', function (done) {
-    var app = express()
+  it('should pass options to send module', async () =>{
+    var app = new koa()
 
-    app.use(function (req, res) {
+    app.use(wrap(function (req, res) {
       res.sendfile(path.resolve(fixtures, 'name.txt'), { start: 0, end: 1 })
     })
 
-    request(app)
+    await request(app.callback())
       .get('/')
-      .expect(200, 'to', done)
+      .expect(200, 'to')
   })
 })
 
 function createApp(path, options, fn) {
-  var app = express();
+  var app = new koa();
 
-  app.use(function (req, res) {
+  app.use(wrap(function (req, res) {
     res.sendFile(path, options, fn);
-  });
+  }));
 
   return app;
 }

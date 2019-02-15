@@ -1,77 +1,78 @@
 
 var Buffer = require('safe-buffer').Buffer
-var express = require('../')
+var koa = require('koa')
   , request = require('supertest');
+const wrap = require('../../lib/wrap');
 
 describe('res', function(){
   describe('.attachment()', function(){
-    it('should Content-Disposition to attachment', function(done){
-      var app = express();
+    it('should Content-Disposition to attachment', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.attachment().send('foo');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect('Content-Disposition', 'attachment', done);
+      .expect('Content-Disposition', 'attachment');
     })
   })
 
   describe('.attachment(filename)', function(){
-    it('should add the filename param', function(done){
-      var app = express();
+    it('should add the filename param', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.attachment('/path/to/image.png');
         res.send('foo');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect('Content-Disposition', 'attachment; filename="image.png"', done);
+      .expect('Content-Disposition', 'attachment; filename="image.png"');
     })
 
-    it('should set the Content-Type', function(done){
-      var app = express();
+    it('should set the Content-Type', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.attachment('/path/to/image.png');
         res.send(Buffer.alloc(4, '.'))
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect('Content-Type', 'image/png', done);
+      .expect('Content-Type', 'image/png');
     })
   })
 
   describe('.attachment(utf8filename)', function(){
-    it('should add the filename and filename* params', function(done){
-      var app = express();
+    it('should add the filename and filename* params', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.attachment('/locales/日本語.txt');
         res.send('japanese');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Content-Disposition', 'attachment; filename="???.txt"; filename*=UTF-8\'\'%E6%97%A5%E6%9C%AC%E8%AA%9E.txt')
-      .expect(200, done);
+      .expect(200);
     })
 
-    it('should set the Content-Type', function(done){
-      var app = express();
+    it('should set the Content-Type', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.attachment('/locales/日本語.txt');
         res.send('japanese');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect('Content-Type', 'text/plain; charset=utf-8', done);
+      .expect('Content-Type', 'text/plain; charset=utf-8');
     })
   })
 })

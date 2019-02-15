@@ -4,99 +4,99 @@ var request = require('supertest')
 
 describe('req', function(){
   describe('.range(size)', function(){
-    it('should return parsed ranges', function (done) {
-      var app = express()
+    it('should return parsed ranges', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.json(req.range(120))
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .set('Range', 'bytes=0-50,51-100')
-      .expect(200, '[{"start":0,"end":50},{"start":51,"end":100}]', done)
+      .expect(200, '[{"start":0,"end":50},{"start":51,"end":100}]')
     })
 
-    it('should cap to the given size', function (done) {
-      var app = express()
+    it('should cap to the given size', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.json(req.range(75))
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .set('Range', 'bytes=0-100')
-      .expect(200, '[{"start":0,"end":74}]', done)
+      .expect(200, '[{"start":0,"end":74}]')
     })
 
-    it('should cap to the given size when open-ended', function (done) {
-      var app = express()
+    it('should cap to the given size when open-ended', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.json(req.range(75))
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .set('Range', 'bytes=0-')
-      .expect(200, '[{"start":0,"end":74}]', done)
+      .expect(200, '[{"start":0,"end":74}]')
     })
 
-    it('should have a .type', function (done) {
-      var app = express()
+    it('should have a .type', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.json(req.range(120).type)
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .set('Range', 'bytes=0-100')
-      .expect(200, '"bytes"', done)
+      .expect(200, '"bytes"')
     })
 
-    it('should accept any type', function (done) {
-      var app = express()
+    it('should accept any type', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.json(req.range(120).type)
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .set('Range', 'users=0-2')
-      .expect(200, '"users"', done)
+      .expect(200, '"users"')
     })
 
-    it('should return undefined if no range', function (done) {
-      var app = express()
+    it('should return undefined if no range', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.send(String(req.range(120)))
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(200, 'undefined', done)
+      .expect(200, 'undefined')
     })
   })
 
   describe('.range(size, options)', function(){
     describe('with "combine: true" option', function(){
-      it('should return combined ranges', function (done) {
-        var app = express()
+      it('should return combined ranges', async () =>{
+        var app = new koa()
 
-        app.use(function (req, res) {
+        app.use(wrap(function (req, res) {
           res.json(req.range(120, {
             combine: true
           }))
         })
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .set('Range', 'bytes=0-50,51-100')
-        .expect(200, '[{"start":0,"end":100}]', done)
+        .expect(200, '[{"start":0,"end":100}]')
       })
     })
   })

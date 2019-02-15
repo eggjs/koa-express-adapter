@@ -1,59 +1,59 @@
 
-var express = require('../')
+var koa = require('koa')
   , request = require('supertest')
   , assert = require('assert');
 
 describe('req', function(){
   describe('.get(field)', function(){
-    it('should return the header field value', function(done){
-      var app = express();
+    it('should return the header field value', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         assert(req.get('Something-Else') === undefined);
         res.end(req.get('Content-Type'));
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .post('/')
       .set('Content-Type', 'application/json')
-      .expect('application/json', done);
+      .expect('application/json');
     })
 
-    it('should special-case Referer', function(done){
-      var app = express();
+    it('should special-case Referer', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.end(req.get('Referer'));
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .post('/')
       .set('Referrer', 'http://foobar.com')
-      .expect('http://foobar.com', done);
+      .expect('http://foobar.com');
     })
 
-    it('should throw missing header name', function (done) {
-      var app = express()
+    it('should throw missing header name', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.end(req.get())
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(500, /TypeError: name argument is required to req.get/, done)
+      .expect(500, /TypeError: name argument is required to req.get/)
     })
 
-    it('should throw for non-string header name', function (done) {
-      var app = express()
+    it('should throw for non-string header name', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.end(req.get(42))
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(500, /TypeError: name must be a string to req.get/, done)
+      .expect(500, /TypeError: name must be a string to req.get/)
     })
   })
 })

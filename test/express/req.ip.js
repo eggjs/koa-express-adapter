@@ -1,43 +1,44 @@
 
-var express = require('../')
+var koa = require('koa')
   , request = require('supertest');
+const wrap = require('../../lib/wrap');
 
 describe('req', function(){
   describe('.ip', function(){
     describe('when X-Forwarded-For is present', function(){
       describe('when "trust proxy" is enabled', function(){
-        it('should return the client addr', function(done){
-          var app = express();
+        it('should return the client addr', async () =>{
+          var app = new koa();
 
           app.enable('trust proxy');
 
-          app.use(function(req, res, next){
+          app.use(wrap(function(req, res, next){
             res.send(req.ip);
-          });
+          }));
 
-          request(app)
+          await request(app.callback())
           .get('/')
           .set('X-Forwarded-For', 'client, p1, p2')
-          .expect('client', done);
+          .expect('client');
         })
 
-        it('should return the addr after trusted proxy', function(done){
-          var app = express();
+        it('should return the addr after trusted proxy', async () =>{
+          var app = new koa();
 
           app.set('trust proxy', 2);
 
-          app.use(function(req, res, next){
+          app.use(wrap(function(req, res, next){
             res.send(req.ip);
-          });
+          }));
 
-          request(app)
+          await request(app.callback())
           .get('/')
           .set('X-Forwarded-For', 'client, p1, p2')
-          .expect('p1', done);
+          .expect('p1');
         })
 
-        it('should return the addr after trusted proxy, from sub app', function (done) {
-          var app = express();
+        it('should return the addr after trusted proxy, from sub app', async () =>{
+          var app = new koa();
           var sub = express();
 
           app.set('trust proxy', 2);
@@ -45,42 +46,42 @@ describe('req', function(){
 
           sub.use(function (req, res, next) {
             res.send(req.ip);
-          });
+          }));
 
-          request(app)
+          await request(app.callback())
           .get('/')
           .set('X-Forwarded-For', 'client, p1, p2')
-          .expect(200, 'p1', done);
+          .expect(200, 'p1');
         })
       })
 
       describe('when "trust proxy" is disabled', function(){
-        it('should return the remote address', function(done){
-          var app = express();
+        it('should return the remote address', async () =>{
+          var app = new koa();
 
-          app.use(function(req, res, next){
+          app.use(wrap(function(req, res, next){
             res.send(req.ip);
-          });
+          }));
 
-          var test = request(app).get('/')
+          var test = await request(app.callback()).get('/')
           test.set('X-Forwarded-For', 'client, p1, p2')
-          test.expect(200, getExpectedClientAddress(test._server), done);
+          test.expect(200, getExpectedClientAddress(test._server));
         })
       })
     })
 
     describe('when X-Forwarded-For is not present', function(){
-      it('should return the remote address', function(done){
-        var app = express();
+      it('should return the remote address', async () =>{
+        var app = new koa();
 
         app.enable('trust proxy');
 
-        app.use(function(req, res, next){
+        app.use(wrap(function(req, res, next){
           res.send(req.ip);
-        });
+        }));
 
-        var test = request(app).get('/')
-        test.expect(200, getExpectedClientAddress(test._server), done)
+        var test = await request(app.callback()).get('/')
+        test.expect(200, getExpectedClientAddress(test._server))
       })
     })
   })

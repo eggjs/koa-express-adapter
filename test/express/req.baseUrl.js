@@ -4,20 +4,20 @@ var request = require('supertest')
 
 describe('req', function(){
   describe('.baseUrl', function(){
-    it('should be empty for top-level route', function(done){
-      var app = express()
+    it('should be empty for top-level route', async () =>{
+      var app = new koa()
 
       app.get('/:a', function(req, res){
         res.end(req.baseUrl)
       })
 
-      request(app)
+      await request(app.callback())
       .get('/foo')
-      .expect(200, '', done)
+      .expect(200, '')
     })
 
-    it('should contain lower path', function(done){
-      var app = express()
+    it('should contain lower path', async () =>{
+      var app = new koa()
       var sub = express.Router()
 
       sub.get('/:b', function(req, res){
@@ -25,13 +25,13 @@ describe('req', function(){
       })
       app.use('/:a', sub)
 
-      request(app)
+      await request(app.callback())
       .get('/foo/bar')
-      .expect(200, '/foo', done);
+      .expect(200, '/foo');
     })
 
-    it('should contain full lower path', function(done){
-      var app = express()
+    it('should contain full lower path', async () =>{
+      var app = new koa()
       var sub1 = express.Router()
       var sub2 = express.Router()
       var sub3 = express.Router()
@@ -43,14 +43,14 @@ describe('req', function(){
       sub1.use('/:b', sub2)
       app.use('/:a', sub1)
 
-      request(app)
+      await request(app.callback())
       .get('/foo/bar/baz/zed')
-      .expect(200, '/foo/bar/baz', done);
+      .expect(200, '/foo/bar/baz');
     })
 
-    it('should travel through routers correctly', function(done){
+    it('should travel through routers correctly', async () =>{
       var urls = []
-      var app = express()
+      var app = new koa()
       var sub1 = express.Router()
       var sub2 = express.Router()
       var sub3 = express.Router()
@@ -69,19 +69,19 @@ describe('req', function(){
         urls.push('2@' + req.baseUrl)
         next()
       })
-      app.use(function(req, res, next){
+      app.use(wrap(function(req, res, next){
         urls.push('3@' + req.baseUrl)
         next()
       })
       app.use('/:a', sub1)
-      app.use(function(req, res, next){
+      app.use(wrap(function(req, res, next){
         urls.push('4@' + req.baseUrl)
         res.end(urls.join(','))
       })
 
-      request(app)
+      await request(app.callback())
       .get('/foo/bar/baz/zed')
-      .expect(200, '3@,1@/foo,0@/foo/bar/baz,2@/foo/bar,4@', done);
+      .expect(200, '3@,1@/foo,0@/foo/bar/baz,2@/foo/bar,4@');
     })
   })
 })

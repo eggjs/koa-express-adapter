@@ -1,25 +1,26 @@
 
-var express = require('../')
+var koa = require('koa')
   , request = require('supertest');
+const wrap = require('../../lib/wrap');
 
 describe('res', function(){
   describe('.locals', function(){
-    it('should be empty by default', function(done){
-      var app = express();
+    it('should be empty by default', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         Object.keys(res.locals).should.eql([]);
         res.end();
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(200, done);
+      .expect(200);
     })
   })
 
-  it('should work when mounted', function(done){
-    var app = express();
+  it('should work when mounted', async () =>{
+    var app = new koa();
     var blog = express();
 
     app.use(blog);
@@ -27,15 +28,15 @@ describe('res', function(){
     blog.use(function(req, res, next){
       res.locals.foo = 'bar';
       next();
-    });
+    }));
 
-    app.use(function(req, res){
+    app.use(wrap(function(req, res){
       res.locals.foo.should.equal('bar');
       res.end();
-    });
+    }));
 
-    request(app)
+    await request(app.callback())
     .get('/')
-    .expect(200, done);
+    .expect(200);
   })
 })

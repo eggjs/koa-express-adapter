@@ -4,50 +4,51 @@ var assert = require('assert');
 var Buffer = require('safe-buffer').Buffer
 var express = require('..');
 var request = require('supertest');
+const wrap = require('../../lib/wrap');
 
 describe('res', function(){
   describe('.download(path)', function(){
-    it('should transfer as an attachment', function(done){
-      var app = express();
+    it('should transfer as an attachment', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.download('test/fixtures/user.html');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Content-Type', 'text/html; charset=UTF-8')
       .expect('Content-Disposition', 'attachment; filename="user.html"')
-      .expect(200, '<p>{{user.name}}</p>', done)
+      .expect(200, '<p>{{user.name}}</p>')
     })
   })
 
   describe('.download(path, filename)', function(){
-    it('should provide an alternate filename', function(done){
-      var app = express();
+    it('should provide an alternate filename', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.download('test/fixtures/user.html', 'document');
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Content-Type', 'text/html; charset=UTF-8')
       .expect('Content-Disposition', 'attachment; filename="document"')
-      .expect(200, done)
+      .expect(200)
     })
   })
 
   describe('.download(path, fn)', function(){
-    it('should invoke the callback', function(done){
-      var app = express();
-      var cb = after(2, done);
+    it('should invoke the callback', async () =>{
+      var app = new koa();
+      var cb = after(2);
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.download('test/fixtures/user.html', cb);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Content-Type', 'text/html; charset=UTF-8')
       .expect('Content-Disposition', 'attachment; filename="user.html"')
@@ -56,15 +57,15 @@ describe('res', function(){
   })
 
   describe('.download(path, filename, fn)', function(){
-    it('should invoke the callback', function(done){
-      var app = express();
-      var cb = after(2, done);
+    it('should invoke the callback', async () =>{
+      var app = new koa();
+      var cb = after(2);
 
-      app.use(function(req, res){
-        res.download('test/fixtures/user.html', 'document', done);
-      });
+      app.use(wrap(function(req, res){
+        res.download('test/fixtures/user.html', 'document');
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Content-Type', 'text/html; charset=UTF-8')
       .expect('Content-Disposition', 'attachment; filename="document"')
@@ -73,16 +74,16 @@ describe('res', function(){
   })
 
   describe('.download(path, filename, options, fn)', function () {
-    it('should invoke the callback', function (done) {
-      var app = express()
-      var cb = after(2, done)
+    it('should invoke the callback', async () =>{
+      var app = new koa()
+      var cb = after(2)
       var options = {}
 
-      app.use(function (req, res) {
-        res.download('test/fixtures/user.html', 'document', options, done)
+      app.use(wrap(function (req, res) {
+        res.download('test/fixtures/user.html', 'document', options)
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect(200)
       .expect('Content-Type', 'text/html; charset=UTF-8')
@@ -90,17 +91,17 @@ describe('res', function(){
       .end(cb)
     })
 
-    it('should allow options to res.sendFile()', function (done) {
-      var app = express()
+    it('should allow options to res.sendFile()', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.download('test/fixtures/.name', 'document', {
           dotfiles: 'allow',
           maxAge: '4h'
         })
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect(200)
       .expect('Content-Disposition', 'attachment; filename="document"')
@@ -110,10 +111,10 @@ describe('res', function(){
     })
 
     describe('when options.headers contains Content-Disposition', function () {
-      it('should should be ignored', function (done) {
-        var app = express()
+      it('should should be ignored', async () =>{
+        var app = new koa()
 
-        app.use(function (req, res) {
+        app.use(wrap(function (req, res) {
           res.download('test/fixtures/user.html', 'document', {
             headers: {
               'Content-Type': 'text/x-custom',
@@ -122,7 +123,7 @@ describe('res', function(){
           })
         })
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect(200)
         .expect('Content-Type', 'text/x-custom')
@@ -130,10 +131,10 @@ describe('res', function(){
         .end(done)
       })
 
-      it('should should be ignored case-insensitively', function (done) {
-        var app = express()
+      it('should should be ignored case-insensitively', async () =>{
+        var app = new koa()
 
-        app.use(function (req, res) {
+        app.use(wrap(function (req, res) {
           res.download('test/fixtures/user.html', 'document', {
             headers: {
               'content-type': 'text/x-custom',
@@ -142,7 +143,7 @@ describe('res', function(){
           })
         })
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .expect(200)
         .expect('Content-Type', 'text/x-custom')
@@ -153,35 +154,35 @@ describe('res', function(){
   })
 
   describe('on failure', function(){
-    it('should invoke the callback', function(done){
-      var app = express();
+    it('should invoke the callback', async () =>{
+      var app = new koa();
 
-      app.use(function (req, res, next) {
+      app.use(wrap(function (req, res, next) {
         res.download('test/fixtures/foobar.html', function(err){
           if (!err) return next(new Error('expected error'));
           res.send('got ' + err.status + ' ' + err.code);
-        });
-      });
+        }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect(200, 'got 404 ENOENT', done);
+      .expect(200, 'got 404 ENOENT');
     })
 
-    it('should remove Content-Disposition', function(done){
-      var app = express()
+    it('should remove Content-Disposition', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res, next) {
+      app.use(wrap(function (req, res, next) {
         res.download('test/fixtures/foobar.html', function(err){
           if (!err) return next(new Error('expected error'));
           res.end('failed');
-        });
-      });
+        }));
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect(shouldNotHaveHeader('Content-Disposition'))
-      .expect(200, 'failed', done);
+      .expect(200, 'failed');
     })
   })
 })

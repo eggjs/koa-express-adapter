@@ -9,96 +9,96 @@ describe('res', function () {
   // headers can appear multiple times; there is no such white list
   // for outgoing, though
   describe('.append(field, val)', function () {
-    it('should append multiple headers', function (done) {
-      var app = express()
+    it('should append multiple headers', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res, next) {
+      app.use(wrap(function (req, res, next) {
         res.append('Link', '<http://localhost/>')
         next()
       })
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.append('Link', '<http://localhost:80/>')
         res.end()
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect('Link', '<http://localhost/>, <http://localhost:80/>', done)
+      .expect('Link', '<http://localhost/>, <http://localhost:80/>')
     })
 
-    it('should accept array of values', function (done) {
-      var app = express()
+    it('should accept array of values', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res, next) {
+      app.use(wrap(function (req, res, next) {
         res.append('Set-Cookie', ['foo=bar', 'fizz=buzz'])
         res.end()
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect(function (res) {
         should(res.headers['set-cookie']).eql(['foo=bar', 'fizz=buzz'])
       })
-      .expect(200, done)
+      .expect(200)
     })
 
-    it('should get reset by res.set(field, val)', function (done) {
-      var app = express()
+    it('should get reset by res.set(field, val)', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res, next) {
+      app.use(wrap(function (req, res, next) {
         res.append('Link', '<http://localhost/>')
         res.append('Link', '<http://localhost:80/>')
         next()
       })
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.set('Link', '<http://127.0.0.1/>')
         res.end()
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect('Link', '<http://127.0.0.1/>', done)
+      .expect('Link', '<http://127.0.0.1/>')
     })
 
-    it('should work with res.set(field, val) first', function (done) {
-      var app = express()
+    it('should work with res.set(field, val) first', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res, next) {
+      app.use(wrap(function (req, res, next) {
         res.set('Link', '<http://localhost/>')
         next()
       })
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.append('Link', '<http://localhost:80/>')
         res.end()
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
-      .expect('Link', '<http://localhost/>, <http://localhost:80/>', done)
+      .expect('Link', '<http://localhost/>, <http://localhost:80/>')
     })
 
-    it('should work with cookies', function (done) {
-      var app = express()
+    it('should work with cookies', async () =>{
+      var app = new koa()
 
-      app.use(function (req, res, next) {
+      app.use(wrap(function (req, res, next) {
         res.cookie('foo', 'bar')
         next()
       })
 
-      app.use(function (req, res) {
+      app.use(wrap(function (req, res) {
         res.append('Set-Cookie', 'bar=baz')
         res.end()
       })
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect(function (res) {
         should(res.headers['set-cookie']).eql(['foo=bar; Path=/', 'bar=baz'])
       })
-      .expect(200, done)
+      .expect(200)
     })
   })
 })

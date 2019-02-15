@@ -1,35 +1,36 @@
 
-var express = require('../')
+var koa = require('koa')
   , request = require('supertest');
+const wrap = require('../../lib/wrap');
 
 describe('res', function(){
   describe('.clearCookie(name)', function(){
-    it('should set a cookie passed expiry', function(done){
-      var app = express();
+    it('should set a cookie passed expiry', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.clearCookie('sid').end();
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Set-Cookie', 'sid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT')
-      .expect(200, done)
+      .expect(200)
     })
   })
 
   describe('.clearCookie(name, options)', function(){
-    it('should set the given params', function(done){
-      var app = express();
+    it('should set the given params', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.clearCookie('sid', { path: '/admin' }).end();
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .get('/')
       .expect('Set-Cookie', 'sid=; Path=/admin; Expires=Thu, 01 Jan 1970 00:00:00 GMT')
-      .expect(200, done)
+      .expect(200)
     })
   })
 })

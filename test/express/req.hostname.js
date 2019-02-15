@@ -1,136 +1,136 @@
 
-var express = require('../')
+var koa = require('koa')
   , request = require('supertest')
 
 describe('req', function(){
   describe('.hostname', function(){
-    it('should return the Host when present', function(done){
-      var app = express();
+    it('should return the Host when present', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.end(req.hostname);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .post('/')
       .set('Host', 'example.com')
-      .expect('example.com', done);
+      .expect('example.com');
     })
 
-    it('should strip port number', function(done){
-      var app = express();
+    it('should strip port number', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.end(req.hostname);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .post('/')
       .set('Host', 'example.com:3000')
-      .expect('example.com', done);
+      .expect('example.com');
     })
 
-    it('should return undefined otherwise', function(done){
-      var app = express();
+    it('should return undefined otherwise', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         req.headers.host = null;
         res.end(String(req.hostname));
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .post('/')
-      .expect('undefined', done);
+      .expect('undefined');
     })
 
-    it('should work with IPv6 Host', function(done){
-      var app = express();
+    it('should work with IPv6 Host', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.end(req.hostname);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .post('/')
       .set('Host', '[::1]')
-      .expect('[::1]', done);
+      .expect('[::1]');
     })
 
-    it('should work with IPv6 Host and port', function(done){
-      var app = express();
+    it('should work with IPv6 Host and port', async () =>{
+      var app = new koa();
 
-      app.use(function(req, res){
+      app.use(wrap(function(req, res){
         res.end(req.hostname);
-      });
+      }));
 
-      request(app)
+      await request(app.callback())
       .post('/')
       .set('Host', '[::1]:3000')
-      .expect('[::1]', done);
+      .expect('[::1]');
     })
 
     describe('when "trust proxy" is enabled', function(){
-      it('should respect X-Forwarded-Host', function(done){
-        var app = express();
+      it('should respect X-Forwarded-Host', async () =>{
+        var app = new koa();
 
         app.enable('trust proxy');
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.end(req.hostname);
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .set('Host', 'localhost')
         .set('X-Forwarded-Host', 'example.com:3000')
-        .expect('example.com', done);
+        .expect('example.com');
       })
 
-      it('should ignore X-Forwarded-Host if socket addr not trusted', function(done){
-        var app = express();
+      it('should ignore X-Forwarded-Host if socket addr not trusted', async () =>{
+        var app = new koa();
 
         app.set('trust proxy', '10.0.0.1');
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.end(req.hostname);
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .set('Host', 'localhost')
         .set('X-Forwarded-Host', 'example.com')
-        .expect('localhost', done);
+        .expect('localhost');
       })
 
-      it('should default to Host', function(done){
-        var app = express();
+      it('should default to Host', async () =>{
+        var app = new koa();
 
         app.enable('trust proxy');
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.end(req.hostname);
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .set('Host', 'example.com')
-        .expect('example.com', done);
+        .expect('example.com');
       })
     })
 
     describe('when "trust proxy" is disabled', function(){
-      it('should ignore X-Forwarded-Host', function(done){
-        var app = express();
+      it('should ignore X-Forwarded-Host', async () =>{
+        var app = new koa();
 
-        app.use(function(req, res){
+        app.use(wrap(function(req, res){
           res.end(req.hostname);
-        });
+        }));
 
-        request(app)
+        await request(app.callback())
         .get('/')
         .set('Host', 'localhost')
         .set('X-Forwarded-Host', 'evil')
-        .expect('localhost', done);
+        .expect('localhost');
       })
     })
   })
