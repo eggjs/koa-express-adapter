@@ -1,0 +1,48 @@
+{
+  "name": "koa-express-adapter",
+  "version": "1.0.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:popomore/koa-express-adapter.git"
+  },
+  "homepage": "https://github.com/popomore/koa-express-adapter",
+  "keywords": [
+    "koa",
+    "express"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "autod": "^3.0.1",
+    "egg-bin": "^4.11.0",
+    "egg-ci": "^1.11.0",
+    "eslint": "^5.13.0",
+    "eslint-config-egg": "^7.1.0",
+    "intelli-espower-loader": "^1.0.1",
+    "koa": "^2.7.0",
+    "supertest": "^3.4.2",
+    "ypkgfiles": "^1.4.0"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "ci": {
+    "version": "8, 10"
+  },
+  "scripts": {
+    "test": "npm run lint && npm run test-local",
+    "test-local": "egg-bin test",
+    "cov": "egg-bin cov",
+    "lint": "eslint .",
+    "ci": "npm run lint && ypkgfiles --check && npm run cov",
+    "autod": "autod",
+    "pkgfiles": "ypkgfiles"
+  },
+  "files": [
+    "index.js",
+    "lib",
+    "bin.js"
+  ],
+  "author": "popomore <sakura9515@gmail.com>",
+  "license": "MIT"
+}
