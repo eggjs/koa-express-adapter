@@ -6,7 +6,7 @@ const wrap = require('../../lib/wrap');
 
 describe('req.is()', function() {
   describe('when given a mime type', function() {
-    it.only('should return the type when matching', async () => {
+    it('should return the type when matching', async () => {
       const app = new koa();
 
       app.use(wrap(function(req, res) {
