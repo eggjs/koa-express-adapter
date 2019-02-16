@@ -1,3 +1,4 @@
+'use strict';
 
 const koa = require('koa');
 const request = require('supertest');
