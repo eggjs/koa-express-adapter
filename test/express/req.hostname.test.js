@@ -6,12 +6,12 @@ const koa = require('koa'),
 const wrap = require('../../lib/wrap');
 
 describe('req', function() {
-  describe('.host', function() {
+  describe('.hostname', function() {
     it('should return the Host when present', async () => {
       const app = new koa();
 
       app.use(wrap(function(req, res) {
-        res.end(req.host);
+        res.end(req.hostname);
       }));
 
       await request(app.callback())
@@ -24,7 +24,7 @@ describe('req', function() {
       const app = new koa();
 
       app.use(wrap(function(req, res) {
-        res.end(req.host);
+        res.end(req.hostname);
       }));
 
       await request(app.callback())
@@ -38,7 +38,7 @@ describe('req', function() {
 
       app.use(wrap(function(req, res) {
         req.headers.host = null;
-        res.end(String(req.host));
+        res.end(String(req.hostname));
       }));
 
       await request(app.callback())
@@ -50,7 +50,7 @@ describe('req', function() {
       const app = new koa();
 
       app.use(wrap(function(req, res) {
-        res.end(req.host);
+        res.end(req.hostname);
       }));
 
       await request(app.callback())
@@ -63,7 +63,7 @@ describe('req', function() {
       const app = new koa();
 
       app.use(wrap(function(req, res) {
-        res.end(req.host);
+        res.end(req.hostname);
       }));
 
       await request(app.callback())
@@ -76,26 +76,26 @@ describe('req', function() {
       it('should respect X-Forwarded-Host', async () => {
         const app = new koa();
 
-        app.enable('trust proxy');
+        app.proxy = true;
 
         app.use(wrap(function(req, res) {
-          res.end(req.host);
+          res.end(req.hostname);
         }));
 
         await request(app.callback())
           .get('/')
           .set('Host', 'localhost')
-          .set('X-Forwarded-Host', 'example.com')
+          .set('X-Forwarded-Host', 'example.com:3000')
           .expect('example.com');
       });
 
-      it('should ignore X-Forwarded-Host if socket addr not trusted', async () => {
+      it.skip('should ignore X-Forwarded-Host if socket addr not trusted', async () => {
         const app = new koa();
 
         app.set('trust proxy', '10.0.0.1');
 
         app.use(wrap(function(req, res) {
-          res.end(req.host);
+          res.end(req.hostname);
         }));
 
         await request(app.callback())
@@ -108,34 +108,16 @@ describe('req', function() {
       it('should default to Host', async () => {
         const app = new koa();
 
-        app.enable('trust proxy');
+        app.proxy = true;
 
         app.use(wrap(function(req, res) {
-          res.end(req.host);
+          res.end(req.hostname);
         }));
 
         await request(app.callback())
           .get('/')
           .set('Host', 'example.com')
           .expect('example.com');
-      });
-
-      describe('when trusting hop count', function() {
-        it('should respect X-Forwarded-Host', async () => {
-          const app = new koa();
-
-          app.set('trust proxy', 1);
-
-          app.use(wrap(function(req, res) {
-            res.end(req.host);
-          }));
-
-          await request(app.callback())
-            .get('/')
-            .set('Host', 'localhost')
-            .set('X-Forwarded-Host', 'example.com')
-            .expect('example.com');
-        });
       });
     });
 
@@ -144,7 +126,7 @@ describe('req', function() {
         const app = new koa();
 
         app.use(wrap(function(req, res) {
-          res.end(req.host);
+          res.end(req.hostname);
         }));
 
         await request(app.callback())

@@ -13,3 +13,5 @@
 - [ ] baseUrl
 - [ ] fresh
 - [x] get
+- [x] hostname
+- [x] host
