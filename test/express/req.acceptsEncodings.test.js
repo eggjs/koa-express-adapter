@@ -6,7 +6,7 @@ const koa = require('koa'),
 const wrap = require('../../lib/wrap');
 
 describe('req', function() {
-  describe('.acceptsEncodingss', function() {
+  describe('.acceptsEncodings', function() {
     it('should be true if encoding accepted', async () => {
       const app = new koa();
 

@@ -1,9 +1,11 @@
 'use strict';
 
-
 const koa = require('koa');
+const request = require('supertest');
+const { wrap } = require('..');
 
-describe('test/wrap.test.js', () => {
+describe.skip('test/wrap.test.js', () => {
+  let app;
 
   it('b', async () => {
     app = new koa();

@@ -7,16 +7,13 @@ const wrap = require('../../lib/wrap');
 
 describe('req', function() {
   describe('.acceptsEncoding', function() {
-    it.only('should be true if encoding accepted', async () => {
+    it('should be true if encoding accepted', async () => {
       const app = new koa();
 
       app.use(wrap(function(req, res) {
-        console.log(res.statusCode);
-        console.log(1111);
         req.acceptsEncoding('gzip').should.be.ok();
         req.acceptsEncoding('deflate').should.be.ok();
-        console.log(1111);
-        res.end('aaaa');
+        res.end();
       }));
 
       await request(app.callback())
