@@ -15,3 +15,5 @@
 - [x] get
 - [x] hostname
 - [x] host
+- [x] ip
+- [x] ips
