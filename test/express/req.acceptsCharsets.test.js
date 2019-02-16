@@ -3,7 +3,7 @@ var koa = require('koa')
   , request = require('supertest');
 const wrap = require('../../lib/wrap');
 
-describe.only('req', function(){
+describe('req', function(){
   describe('.acceptsCharsets(type)', function(){
     describe('when Accept-Charset is not present', function(){
       it('should return true', async () =>{

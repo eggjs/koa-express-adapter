@@ -3,7 +3,7 @@ var koa = require('koa');
 var request = require('supertest');
 var wrap = require('../../lib/wrap');
 
-describe.only('req', function(){
+describe('req', function(){
   describe('.accepts(type)', function(){
     it('should return true when Accept is not present', async () => {
       var app = new koa();

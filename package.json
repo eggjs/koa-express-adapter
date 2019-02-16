@@ -20,6 +20,7 @@
     "eslint-config-egg": "^7.1.0",
     "intelli-espower-loader": "^1.0.1",
     "koa": "^2.7.0",
+    "should": "^13.2.3",
     "supertest": "^3.4.2",
     "ypkgfiles": "^1.4.0"
   },
@@ -31,8 +32,8 @@
   },
   "scripts": {
     "test": "npm run lint && npm run test-local",
-    "test-local": "egg-bin test",
-    "cov": "egg-bin cov",
+    "test-local": "egg-bin test -r should",
+    "cov": "egg-bin cov -r should",
     "lint": "eslint .",
     "ci": "npm run lint && ypkgfiles --check && npm run cov",
     "autod": "autod",
