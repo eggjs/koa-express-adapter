@@ -41,8 +41,7 @@
   },
   "files": [
     "index.js",
-    "lib",
-    "bin.js"
+    "lib"
   ],
   "author": "popomore <sakura9515@gmail.com>",
   "license": "MIT"
