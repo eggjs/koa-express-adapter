@@ -3,6 +3,7 @@ var assert = require('assert')
 var express = require('..');
 var request = require('supertest');
 const wrap = require('../../lib/wrap');
+const wrap = require('../../lib/wrap');
 var utils = require('./support/utils');
 
 describe('res', function(){

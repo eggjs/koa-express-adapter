@@ -1,3 +1,4 @@
+'use strict';
 
 var koa = require('koa')
   , request = require('supertest');
@@ -9,7 +10,7 @@ describe('req', function(){
       it('should return false when http', async () =>{
         var app = new koa();
 
-        app.get('/', function(req, res){
+        app.get('/', wrap(function(req, res){
           res.send(req.secure ? 'yes' : 'no');
         }));
 
@@ -25,7 +26,7 @@ describe('req', function(){
       it('should return false when http', async () =>{
         var app = new koa();
 
-        app.get('/', function(req, res){
+        app.get('/', wrap(function(req, res){
           res.send(req.secure ? 'yes' : 'no');
         }));
 
@@ -40,7 +41,7 @@ describe('req', function(){
 
         app.enable('trust proxy');
 
-        app.get('/', function(req, res){
+        app.get('/', wrap(function(req, res){
           res.send(req.secure ? 'yes' : 'no');
         }));
 
@@ -55,7 +56,7 @@ describe('req', function(){
 
         app.enable('trust proxy');
 
-        app.get('/', function(req, res){
+        app.get('/', wrap(function(req, res){
           res.send(req.secure ? 'yes' : 'no');
         }));
 
@@ -70,7 +71,7 @@ describe('req', function(){
 
         app.enable('trust proxy');
 
-        app.get('/', function(req, res){
+        app.get('/', wrap(function(req, res){
           res.send(req.secure ? 'yes' : 'no');
         }));
 
@@ -86,7 +87,7 @@ describe('req', function(){
 
           app.set('trust proxy', 1);
 
-          app.get('/', function (req, res) {
+          app.get('/', wrap(function (req, res) {
             res.send(req.secure ? 'yes' : 'no');
           }));
 

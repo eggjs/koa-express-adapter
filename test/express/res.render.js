@@ -3,6 +3,7 @@ var express = require('..');
 var path = require('path')
 var request = require('supertest');
 const wrap = require('../../lib/wrap');
+const wrap = require('../../lib/wrap');
 var tmpl = require('./support/tmpl');
 
 describe('res', function(){

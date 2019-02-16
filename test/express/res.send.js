@@ -5,6 +5,7 @@ var express = require('..');
 var methods = require('methods');
 var request = require('supertest');
 const wrap = require('../../lib/wrap');
+const wrap = require('../../lib/wrap');
 var utils = require('./support/utils');
 
 describe('res', function(){

@@ -1,21 +1,23 @@
 
-var koa = require('koa')
-  , request = require('supertest');
+'use strict';
+
+const koa = require('koa'),
+  request = require('supertest');
 const wrap = require('../../lib/wrap');
 
-describe('res', function(){
-  describe('.status(code)', function(){
-    it('should set the response .statusCode', async () =>{
-      var app = new koa();
+describe('res', function() {
+  describe('.status(code)', function() {
+    it('should set the response .statusCode', async () => {
+      const app = new koa();
 
-      app.use(wrap(function(req, res){
+      app.use(wrap(function(req, res) {
         res.status(201).end('Created');
       }));
 
       await request(app.callback())
-      .get('/')
-      .expect('Created')
-      .expect(201);
-    })
-  })
-})
+        .get('/')
+        .expect('Created')
+        .expect(201);
+    });
+  });
+});

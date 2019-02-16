@@ -115,7 +115,7 @@ describe('res', function(){
 
         app.use(wrap(function (req, res) {
           res.json({ '&': '<script>' })
-        })
+        }))
 
         await request(app.callback())
         .get('/')

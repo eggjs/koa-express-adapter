@@ -75,7 +75,7 @@ describe('res', function(){
         var app = new koa();
 
         app.use(wrap(function(req, res){
-          res.cookie('name', 'tobi', { maxAge: 1000 }));
+          res.cookie('name', 'tobi', { maxAge: 1000 });
           res.end();
         }));
 
@@ -91,7 +91,7 @@ describe('res', function(){
         var app = new koa();
 
         app.use(wrap(function(req, res){
-          res.cookie('name', 'tobi', { maxAge: 1000 }));
+          res.cookie('name', 'tobi', { maxAge: 1000 });
           res.end();
         }));
 

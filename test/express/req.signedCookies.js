@@ -12,7 +12,7 @@ describe('req', function(){
 
       app.use(wrap(function(req, res){
         if (req.path === '/set') {
-          res.cookie('obj', { foo: 'bar' }, { signed: true }));
+          res.cookie('obj', { foo: 'bar' }, { signed: true });
           res.end();
         } else {
           res.send(req.signedCookies);

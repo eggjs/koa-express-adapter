@@ -30,14 +30,14 @@ app1.use(function(err, req, res, next){
   res.send(err.status, 'Supports: ' + err.types.join(', '));
 })
 
-var app2 = express();
+var app2 = new koa()
 
-app2.use(function(req, res, next){
+app2.use(wrap(function(req, res, next){
   res.format({
     text: function(){ res.send('hey') },
     html: function(){ res.send('<p>hey</p>') },
     json: function(){ res.send({ message: 'hey' }) }
-  }));
+  });
 }));
 
 app2.use(function(err, req, res, next){
