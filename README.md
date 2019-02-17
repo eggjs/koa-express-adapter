@@ -33,7 +33,7 @@
 ### Response
 
 - [ ] append
-- [ ] attachment
+- [x] attachment
 - [x] clearCookie
 - [x] cookie
 - [ ] download

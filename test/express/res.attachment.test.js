@@ -1,8 +1,6 @@
 'use strict';
 
 const Buffer = require('safe-buffer').Buffer;
-'use strict';
-
 const koa = require('koa'),
   request = require('supertest');
 const wrap = require('../../lib/wrap');
