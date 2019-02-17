@@ -305,7 +305,7 @@ describe('res', function() {
     const app = new koa();
     const etag = '"asdf"';
 
-    app.use(wrap(function(req, res, next) {
+    app.use(wrap(function(req, res) {
       res.set('ETag', etag);
       res.send('hey');
     }));

@@ -38,8 +38,8 @@
 - [ ] cookie
 - [ ] download
 - [ ] format
-- [ ] get
-- [ ] json
+- [x] get
+- [x] json
 - [ ] jsonp
 - [ ] links
 - [ ] locals
@@ -49,7 +49,7 @@
 - [ ] send
 - [ ] sendFile
 - [ ] sendStatus
-- [ ] set
+- [x] set
 - [ ] status
 - [ ] type
 - [ ] vary
