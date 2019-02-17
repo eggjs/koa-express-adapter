@@ -1,3 +1,4 @@
+# The adapter for the migration from express to koa
 
 ## Express API
 
@@ -46,7 +47,7 @@
 - [x] location
 - [x] redirect
 - [ ] render
-- [ ] send
+- [x] send
 - [ ] sendFile
 - [x] sendStatus
 - [x] set
