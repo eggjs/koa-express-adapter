@@ -1,14 +1,13 @@
 'use strict';
 
 const assert = require('assert');
-const koa = require('koa');
 const Buffer = require('safe-buffer').Buffer;
 const methods = require('methods');
 const request = require('supertest');
 const wrap = require('../../lib/wrap');
 const utils = require('../utils');
 
-describe.only('res', function() {
+describe('res', function() {
   describe('.send()', function() {
     it('should set body to ""', async () => {
       const app = utils.createApp();

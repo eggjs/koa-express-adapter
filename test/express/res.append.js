@@ -32,7 +32,7 @@ describe('res', function() {
     it('should accept array of values', async () => {
       const app = new koa();
 
-      app.use(wrap(function(req, res, next) {
+      app.use(wrap(function(req, res) {
         res.append('Set-Cookie', [ 'foo=bar', 'fizz=buzz' ]);
         res.end();
       }));
