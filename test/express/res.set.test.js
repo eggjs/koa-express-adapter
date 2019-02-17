@@ -85,9 +85,6 @@ describe('res', function() {
 
       await request(app.callback())
         .get('/')
-        .expect(res => {
-          console.log(res);
-        })
         .expect(500, /TypeError: Content-Type cannot be set to an Array/);
     });
   });

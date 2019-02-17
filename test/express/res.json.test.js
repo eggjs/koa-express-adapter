@@ -1,6 +1,5 @@
 'use strict';
 
-const koa = require('koa');
 const request = require('supertest');
 const assert = require('assert');
 const { wrap } = require('../..');

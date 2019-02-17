@@ -19,6 +19,7 @@ function createApp() {
     try {
       await next();
     } catch (err) {
+      console.log(err.stack);
       ctx.status = 500;
       ctx.body = err.stack;
     }

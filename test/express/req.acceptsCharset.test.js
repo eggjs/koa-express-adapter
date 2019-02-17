@@ -11,7 +11,7 @@ describe('req', function() {
       it('should return true', async () => {
         const app = new koa();
 
-        app.use(wrap(function(req, res, next) {
+        app.use(wrap(function(req, res) {
           res.end(req.acceptsCharset('utf-8') ? 'yes' : 'no');
         }));
 
@@ -25,7 +25,7 @@ describe('req', function() {
       it('should return true when present', async () => {
         const app = new koa();
 
-        app.use(wrap(function(req, res, next) {
+        app.use(wrap(function(req, res) {
           res.end(req.acceptsCharset('utf-8') ? 'yes' : 'no');
         }));
 
@@ -38,7 +38,7 @@ describe('req', function() {
       it('should return false otherwise', async () => {
         const app = new koa();
 
-        app.use(wrap(function(req, res, next) {
+        app.use(wrap(function(req, res) {
           res.end(req.acceptsCharset('utf-8') ? 'yes' : 'no');
         }));
 

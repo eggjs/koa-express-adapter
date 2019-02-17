@@ -22,7 +22,7 @@ describe('req', function() {
     it('should return true when present', async () => {
       const app = new koa();
 
-      app.use(wrap(function(req, res, next) {
+      app.use(wrap(function(req, res) {
         res.end(req.accepts('json') ? 'yes' : 'no');
       }));
 
@@ -35,7 +35,7 @@ describe('req', function() {
     it('should return false otherwise', async () => {
       const app = new koa();
 
-      app.use(wrap(function(req, res, next) {
+      app.use(wrap(function(req, res) {
         res.end(req.accepts('json') ? 'yes' : 'no');
       }));
 
@@ -49,7 +49,7 @@ describe('req', function() {
   it('should accept an argument list of type names', async () => {
     const app = new koa();
 
-    app.use(wrap(function(req, res, next) {
+    app.use(wrap(function(req, res) {
       res.end(req.accepts('json', 'html'));
     }));
 
@@ -63,7 +63,7 @@ describe('req', function() {
     it('should return the first when Accept is not present', async () => {
       const app = new koa();
 
-      app.use(wrap(function(req, res, next) {
+      app.use(wrap(function(req, res) {
         res.end(req.accepts([ 'json', 'html' ]));
       }));
 
@@ -75,7 +75,7 @@ describe('req', function() {
     it('should return the first acceptable type', async () => {
       const app = new koa();
 
-      app.use(wrap(function(req, res, next) {
+      app.use(wrap(function(req, res) {
         res.end(req.accepts([ 'json', 'html' ]));
       }));
 
@@ -88,7 +88,7 @@ describe('req', function() {
     it('should return false when no match is made', async () => {
       const app = new koa();
 
-      app.use(wrap(function(req, res, next) {
+      app.use(wrap(function(req, res) {
         res.end(req.accepts([ 'text/html', 'application/json' ]) ? 'yup' : 'nope');
       }));
 
@@ -101,7 +101,7 @@ describe('req', function() {
     it('should take quality into account', async () => {
       const app = new koa();
 
-      app.use(wrap(function(req, res, next) {
+      app.use(wrap(function(req, res) {
         res.end(req.accepts([ 'text/html', 'application/json' ]));
       }));
 
@@ -114,7 +114,7 @@ describe('req', function() {
     it('should return the first acceptable type with canonical mime types', async () => {
       const app = new koa();
 
-      app.use(wrap(function(req, res, next) {
+      app.use(wrap(function(req, res) {
         res.end(req.accepts([ 'application/json', 'text/html' ]));
       }));
 

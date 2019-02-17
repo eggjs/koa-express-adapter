@@ -43,8 +43,8 @@
 - [ ] jsonp
 - [ ] links
 - [ ] locals
-- [ ] location
-- [ ] redirect
+- [x] location
+- [x] redirect
 - [ ] render
 - [ ] send
 - [ ] sendFile

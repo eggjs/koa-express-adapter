@@ -117,7 +117,7 @@ describe('res', function() {
 
         await request(app.callback())
           .get('/')
-          .end(function(err, res) {
+          .end(function() {
             options.should.eql(optionsCopy);
           });
       });
