@@ -4,7 +4,7 @@ const koa = require('koa'),
   request = require('supertest');
 const wrap = require('../../lib/wrap');
 
-describe.only('req', function() {
+describe('req', function() {
   describe('.query', function() {
     it('should default to {}', async () => {
       const app = createApp();

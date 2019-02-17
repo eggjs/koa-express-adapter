@@ -51,5 +51,5 @@
 - [ ] sendStatus
 - [x] set
 - [ ] status
-- [ ] type
+- [x] type
 - [ ] vary

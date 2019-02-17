@@ -16,8 +16,7 @@ describe('res', function() {
 
       await request(app.callback())
         .get('/')
-        .expect('Content-Type', 'application/javascript; charset=utf-8')
-        .end(done);
+        .expect('Content-Type', 'application/javascript; charset=utf-8');
     });
 
     it('should default to application/octet-stream', async () => {
