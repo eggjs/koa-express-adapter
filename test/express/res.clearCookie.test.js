@@ -16,7 +16,7 @@ describe('res', function() {
 
       await request(app.callback())
         .get('/')
-        .expect('Set-Cookie', 'sid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT')
+        .expect('Set-Cookie', 'sid=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT')
         .expect(200);
     });
   });
@@ -31,7 +31,7 @@ describe('res', function() {
 
       await request(app.callback())
         .get('/')
-        .expect('Set-Cookie', 'sid=; Path=/admin; Expires=Thu, 01 Jan 1970 00:00:00 GMT')
+        .expect('Set-Cookie', 'sid=; path=/admin; expires=Thu, 01 Jan 1970 00:00:00 GMT')
         .expect(200);
     });
   });

@@ -34,8 +34,8 @@
 
 - [ ] append
 - [ ] attachment
-- [ ] clearCookie
-- [ ] cookie
+- [x] clearCookie
+- [x] cookie
 - [ ] download
 - [ ] format
 - [x] get

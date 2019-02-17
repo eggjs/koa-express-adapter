@@ -15,6 +15,14 @@ exports.createApp =
 function createApp() {
   const app = new koa();
   const router = new Router();
+  app.use(async (ctx, next) => {
+    try {
+      await next();
+    } catch (err) {
+      ctx.status = 500;
+      ctx.body = err.stack;
+    }
+  });
   app.use(router.routes());
   app.use(router.allowedMethods());
   app.router = router;

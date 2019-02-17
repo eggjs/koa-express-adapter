@@ -29,7 +29,7 @@ describe('req', function(){
         .get('/')
         .set('Cookie', cookie)
         .expect(200, { obj: { foo: 'bar' } })
-      }));
+      });
     })
   })
 })
