@@ -3,7 +3,7 @@
 const koa = require('koa');
 const request = require('supertest');
 const wrap = require('../../lib/wrap');
-const utils = require('./support/utils');
+const utils = require('../utils');
 
 describe('res.vary()', function() {
   describe('with no arguments', function() {

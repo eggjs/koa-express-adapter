@@ -52,4 +52,4 @@
 - [x] set
 - [x] status
 - [x] type
-- [ ] vary
+- [x] vary
