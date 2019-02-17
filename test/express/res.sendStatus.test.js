@@ -1,6 +1,8 @@
+'use strict';
 
 const koa = require('koa');
 const request = require('supertest');
+const { wrap } = require('../..');
 
 describe('res', function() {
   describe('.sendStatus(statusCode)', function() {

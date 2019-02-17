@@ -48,7 +48,7 @@
 - [ ] render
 - [ ] send
 - [ ] sendFile
-- [ ] sendStatus
+- [x] sendStatus
 - [x] set
 - [x] status
 - [x] type
