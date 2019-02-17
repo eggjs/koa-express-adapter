@@ -5,7 +5,7 @@ const request = require('supertest');
 const wrap = require('../../lib/wrap');
 const utils = require('../utils');
 
-describe.only('res', function() {
+describe('res', function() {
   describe('.redirect(url)', function() {
     it('should default to a 302 redirect', async () => {
       const app = utils.createApp();

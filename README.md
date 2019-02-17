@@ -42,7 +42,7 @@
 - [x] json
 - [ ] jsonp
 - [ ] links
-- [ ] locals
+- [x] locals
 - [x] location
 - [x] redirect
 - [ ] render
