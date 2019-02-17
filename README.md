@@ -50,6 +50,6 @@
 - [ ] sendFile
 - [ ] sendStatus
 - [x] set
-- [ ] status
+- [x] status
 - [x] type
 - [ ] vary
