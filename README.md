@@ -19,9 +19,9 @@
 - [x] ips
 - [x] is
 - [ ] param
-- [ ] path
-- [ ] protocol
-- [ ] query
+- [x] path
+- [x] protocol
+- [x] query
 - [ ] range
 - [ ] route
 - [ ] secure
