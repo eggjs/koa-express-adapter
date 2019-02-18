@@ -1,7 +1,7 @@
 {
   "name": "koa-express-adapter",
   "version": "1.0.0",
-  "description": "",
+  "description": "The adapter for the migration from express to ko",
   "repository": {
     "type": "git",
     "url": "git@github.com:popomore/koa-express-adapter.git"
@@ -12,8 +12,10 @@
     "express"
   ],
   "dependencies": {
+    "content-disposition": "^0.5.3",
     "encodeurl": "^1.0.2",
-    "statuses": "^1.5.0"
+    "statuses": "^1.5.0",
+    "vary": "^1.1.2"
   },
   "devDependencies": {
     "@eggjs/router": "^2.0.0",
@@ -25,7 +27,7 @@
     "egg-ci": "^1.11.0",
     "eslint": "^5.14.0",
     "eslint-config-egg": "^7.1.0",
-    "intelli-espower-loader": "^1.0.1",
+    "express": "^4.16.4",
     "koa": "^2.7.0",
     "methods": "^1.1.2",
     "on-finished": "^2.3.0",
@@ -39,7 +41,11 @@
     "node": ">=8.0.0"
   },
   "ci": {
-    "version": "8, 10"
+    "version": "8, 10",
+    "license": {
+      "year": 2019,
+      "fullname": "popomore"
+    }
   },
   "scripts": {
     "test": "npm run lint && npm run test-local",
