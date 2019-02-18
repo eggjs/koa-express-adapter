@@ -1,0 +1,59 @@
+{
+  "name": "koa-express-adapter",
+  "version": "1.0.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:popomore/koa-express-adapter.git"
+  },
+  "homepage": "https://github.com/popomore/koa-express-adapter",
+  "keywords": [
+    "koa",
+    "express"
+  ],
+  "dependencies": {
+    "encodeurl": "^1.0.2",
+    "statuses": "^1.5.0"
+  },
+  "devDependencies": {
+    "@eggjs/router": "^2.0.0",
+    "after": "^0.8.2",
+    "autod": "^3.0.1",
+    "cookie": "^0.3.1",
+    "cookie-parser": "^1.4.4",
+    "egg-bin": "^4.11.0",
+    "egg-ci": "^1.11.0",
+    "eslint": "^5.14.0",
+    "eslint-config-egg": "^7.1.0",
+    "intelli-espower-loader": "^1.0.1",
+    "koa": "^2.7.0",
+    "methods": "^1.1.2",
+    "on-finished": "^2.3.0",
+    "safe-buffer": "^5.1.2",
+    "should": "^13.2.3",
+    "supertest": "^3.4.2",
+    "utils-merge": "^1.0.1",
+    "ypkgfiles": "^1.4.0"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "ci": {
+    "version": "8, 10"
+  },
+  "scripts": {
+    "test": "npm run lint && npm run test-local",
+    "test-local": "egg-bin test -r should",
+    "cov": "egg-bin cov -r should",
+    "lint": "eslint .",
+    "ci": "npm run lint && ypkgfiles --check && npm run cov",
+    "autod": "autod",
+    "pkgfiles": "ypkgfiles"
+  },
+  "files": [
+    "index.js",
+    "lib"
+  ],
+  "author": "popomore <sakura9515@gmail.com>",
+  "license": "MIT"
+}
